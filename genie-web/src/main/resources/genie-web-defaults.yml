@@ -47,6 +47,8 @@ genie:
         enabled: true
       titus:
         enabled: false
+      k8s:
+        enabled: false
     routing:
       refresh-interval: 3s
   health:

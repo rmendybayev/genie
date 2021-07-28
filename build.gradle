@@ -116,6 +116,8 @@ configure(javaProjects) {
             dependency("org.codehaus.groovy:groovy-all:2.5.13")
             dependency("org.codehaus.janino:janino:3.1.2")
             dependency("org.dbunit:dbunit:2.7.0")
+            dependency("io.kubernetes:client-java:11.0.0")
+
         }
     }
 
@@ -452,6 +454,11 @@ ext.getDockerTags = { String appName, String projectVersion ->
     } else {
         tags.add("netflixoss/${appName}:latest.snapshot")
     }
+    if (project.hasProperty("docker.registry")) {
+        def tagsWithRepo = tags.collect()
+        tagsWithRepo.each {tags.add("${project.getProperty('docker.registry')}/${it}")}
+        tags.removeAll(tagsWithRepo)
+    }
     return tags
 }
 
@@ -477,6 +484,28 @@ task dockerBuildAllImages(group: "Docker", description: "Container task for all 
     dependsOn ":genie-app:dockerBuildAppImage"
     dependsOn ":genie-demo:dockerBuildApacheImage"
     dependsOn ":genie-demo:dockerBuildClientImage"
+}
+def genieAgentAppImageName = "genie-agent-app"
+
+task dockerPushGcr(group: "Docker", description: "Push the built docker app image to Gcr") {
+    onlyIf {
+        rootProject.ext.isDockerRunning() && System.getenv("GCR")
+    }
+    dependsOn ":genie-app:dockerBuildAppImage"
+    dependsOn ":genie-demo:dockerBuildClientImage"
+    dependsOn ":genie-agent-app:dockerBuildAgentAppImage"
+    dependsOn ":genie-demo:dockerBuildApacheImage"
+
+    def imageList = ["genie-app", "genie-demo-client", genieAgentAppImageName, "genie-demo-apache"]
+    doLast {
+        imageList.each {
+            for (String tag : rootProject.ext.getDockerTags(it, project.version.toString())) {
+                exec {
+                    commandLine "docker", "push", tag
+                }
+            }
+        }
+    }
 }
 
 gradleEnterprise {

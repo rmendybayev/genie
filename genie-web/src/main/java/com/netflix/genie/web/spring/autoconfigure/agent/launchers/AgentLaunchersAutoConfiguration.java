@@ -22,11 +22,13 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.netflix.genie.common.internal.tracing.brave.BraveTracingComponents;
 import com.netflix.genie.common.internal.util.GenieHostInfo;
 import com.netflix.genie.web.agent.launchers.AgentLauncher;
+import com.netflix.genie.web.agent.launchers.impl.KubernetesAgentLauncherImpl;
 import com.netflix.genie.web.agent.launchers.impl.LocalAgentLauncherImpl;
 import com.netflix.genie.web.agent.launchers.impl.TitusAgentLauncherImpl;
 import com.netflix.genie.web.data.services.DataServices;
 import com.netflix.genie.web.introspection.GenieWebHostInfo;
 import com.netflix.genie.web.introspection.GenieWebRpcInfo;
+import com.netflix.genie.web.properties.KubernetesAgentLauncherProperties;
 import com.netflix.genie.web.properties.LocalAgentLauncherProperties;
 import com.netflix.genie.web.properties.TitusAgentLauncherProperties;
 import com.netflix.genie.web.util.ExecutorFactory;
@@ -61,7 +63,8 @@ import java.util.concurrent.TimeUnit;
 @EnableConfigurationProperties(
     {
         LocalAgentLauncherProperties.class,
-        TitusAgentLauncherProperties.class
+        TitusAgentLauncherProperties.class,
+        KubernetesAgentLauncherProperties.class
     }
 )
 @AutoConfigureAfter(
@@ -242,5 +245,28 @@ public class AgentLaunchersAutoConfiguration {
             tracingComponents,
             registry
         );
+    }
+
+    /**
+     * Provide a {@link AgentLauncher} implementation which launches k8s agent process if enabled via property.
+     * @param genieWebHostInfo
+     * @param genieWebRpcInfo
+     * @param kubernetesAgentLauncherProperties
+     * @param environment
+     * @return {@link KubernetesAgentLauncherImpl} instance
+     */
+    @Bean
+    @ConditionalOnProperty(name = KubernetesAgentLauncherProperties.ENABLE_PROPERTY, havingValue = "true")
+    public KubernetesAgentLauncherImpl kubernetesAgentLauncher(
+        final GenieWebHostInfo genieWebHostInfo,
+        final GenieWebRpcInfo genieWebRpcInfo,
+        final KubernetesAgentLauncherProperties kubernetesAgentLauncherProperties,
+        final Environment environment
+    ) {
+        return new KubernetesAgentLauncherImpl(
+            genieWebHostInfo,
+            genieWebRpcInfo,
+            kubernetesAgentLauncherProperties,
+            environment);
     }
 }

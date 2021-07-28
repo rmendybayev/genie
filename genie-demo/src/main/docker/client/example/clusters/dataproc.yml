@@ -1,0 +1,13 @@
+name: GenieDemoDataproc
+user: genieDemo
+version: 1.5-debian10
+status: UP
+setupFile: http://genie-apache/clusters/gcp/dataproc/1.5-debian10/setup.sh
+tags:
+  - sched:cloud
+  - type:dataproc
+  - ver:1.5-debian10
+configs:
+  - http://genie-apache/clusters/gcp/dataproc/1.5-debian10/conf/core-site.xml
+  - http://genie-apache/clusters/gcp/dataproc/1.5-debian10/conf/mapred-site.xml
+  - http://genie-apache/clusters/gcp/dataproc/1.5-debian10/conf/yarn-site.xml

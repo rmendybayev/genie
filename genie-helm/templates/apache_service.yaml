@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: genie-apache
+spec:
+  selector:
+    app: genie-apache
+  ports:
+    - port: 80
+  type: ClusterIP

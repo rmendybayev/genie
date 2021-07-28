@@ -1,0 +1,13 @@
+name: gcloud
+user: genieDemo
+status: ACTIVE
+description: GCloud Application
+setupFile: http://genie-apache/applications/gcloud/354/setup.sh
+configs: []
+version: 354
+type: dataproc
+tags:
+  - type:gcloud
+  - ver:354
+dependencies:
+  - http://genie-apache/applications/gcloud/354/google-cloud-sdk-354.0.0-linux-x86_64.tar.gz

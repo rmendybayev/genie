@@ -1,0 +1,24 @@
+apache:
+  image:
+    repository: us.gcr.io/or2-msq-epmc-bdcc-t1iylu/netflixoss/genie-demo-apache
+    tag: 4.1.0-SNAPSHOT
+    pullPolicy: IfNotPresent
+app:
+  image:
+    repository: us.gcr.io/or2-msq-epmc-bdcc-t1iylu/netflixoss/genie-app
+    tag: 4.1.0-SNAPSHOT
+    pullPolicy: Always
+client:
+  image:
+    repository: us.gcr.io/or2-msq-epmc-bdcc-t1iylu/netflixoss/genie-demo-client
+    tag: 4.1.0-SNAPSHOT
+    pullPolicy: IfNotPresent
+appAgent:
+  image:
+    repository: us.gcr.io/or2-msq-epmc-bdcc-t1iylu/netflixoss/genie-agent-app
+    tag: 4.1.0-SNAPSHOT
+gke:
+  enabled: true
+  disk:
+    name: genie-dev-mvplatform-gke-core-region-disk
+    capacity: 50
