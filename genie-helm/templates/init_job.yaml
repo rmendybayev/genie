@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ printf "%s-init-demo" (include "common.names.fullname" .) }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: init-demo
+spec:
+  ttlSecondsAfterFinished: 0
+  template:
+    metadata:
+      labels: {{- include "common.labels.standard" . | nindent 8 }}
+        app.kubernetes.io/component: init-demo
+    spec:
+      containers:
+        - name: genie-client-init-job
+          image: {{.Values.client.image.repository}}:{{.Values.client.image.tag}}
+          imagePullPolicy: {{.Values.client.image.pullPolicy}}
+          readinessProbe:
+            httpGet:
+              host: genie
+              port: 8080
+          command:
+            - "python"
+          args:
+            - "init_demo.py"
+      restartPolicy: Never
+  parallelism: 1
+  completions: 1
+  backoffLimit: 1
+

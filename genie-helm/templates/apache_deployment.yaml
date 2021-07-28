@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ printf "%s-apache" (include "common.names.fullname" .) }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: apache
+spec:
+  selector:
+    matchLabels: {{- include "common.labels.matchLabels" . | nindent 6 }}
+      app.kubernetes.io/component: apache
+  replicas: 1
+  template:
+    metadata:
+      name: genie-apache
+      labels: {{- include "common.labels.standard" . | nindent 8 }}
+        app.kubernetes.io/component: apache
+    spec:
+      containers:
+        - name: genie-apache
+          image: {{ .Values.apache.image.repository}}:{{ .Values.apache.image.tag }}
+          imagePullPolicy: {{.Values.apache.image.pullPolicy}}
+      restartPolicy: Always
+

@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ printf "%s-app" (include "common.names.fullname" .)}}
+  labels: {{ include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: app
+spec:
+  selector:
+    matchLabels: {{ include "common.labels.matchLabels" . | nindent 6 }}
+      app.kubernetes.io/component: app
+  replicas: 1
+  template:
+    metadata:
+      labels: {{ include "common.labels.standard" . | nindent 8 }}
+        app.kubernetes.io/component: app
+    spec:
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+      volumes:
+        - name: jobs-pv-storage
+          persistentVolumeClaim:
+            {{- if .Values.gke.enabled }}
+            claimName: {{ printf "%s-gke-pvc" (include "common.names.fullname" .) }}
+            {{- else }}
+            claimName: {{ printf "%s-jobs-output-pvc" (include "common.names.fullname" .)}}
+            {{- end }}
+
+      containers:
+        - name: genie-app
+          image: {{.Values.app.image.repository }}:{{.Values.app.image.tag}}
+          imagePullPolicy: {{.Values.app.image.pullPolicy}}
+          volumeMounts:
+            - mountPath: "/tmp/genie"
+              name: jobs-pv-storage
+          env:
+            - name: genie.agent.launcher.k8s.pvc
+              {{- if .Values.gke.enabled }}
+              value: {{ printf "%s-gke-pvc" (include "common.names.fullname" .) }}
+              {{- else }}
+              value: {{ printf "%s-jobs-output-pvc" (include "common.names.fullname" .)}}
+              {{- end }}
+            - name: genie.agent.launcher.k8s.image
+              value: {{ .Values.appAgent.image.repository}}:{{ .Values.appAgent.image.tag}}
+            - name: genie.agent.launcher.k8s.sa
+              {{- if .Values.gke.enabled}}
+              value: {{.Values.gke.sa.k8s }}
+              {{- else}}
+              value: {{ printf "%s-app-sa" (include "common.names.fullname" .) }}
+              {{- end}}
+      restartPolicy: Always
+      {{- if .Values.gke.enabled }}
+      serviceAccountName: {{ .Values.gke.sa.k8s }}
+      {{- else }}
+      serviceAccountName: {{ printf "%s-app-sa" (include "common.names.fullname" .) }}
+      {{- end }}
+

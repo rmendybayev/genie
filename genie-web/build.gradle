@@ -63,6 +63,7 @@ dependencies {
      * Implementation Dependencies
      *******************************/
 
+    implementation("io.kubernetes:client-java")
     implementation("com.amazonaws:aws-java-sdk-s3")
     implementation("com.amazonaws:aws-java-sdk-sts")
     implementation("com.google.guava:guava")

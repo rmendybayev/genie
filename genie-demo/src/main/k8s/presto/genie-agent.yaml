@@ -1,0 +1,31 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: genie-agent-job
+spec:
+  template:
+    spec:
+      volumes:
+        - name: jobs-pv-storage
+          persistentVolumeClaim:
+            claimName: jobs-output-pvc
+      containers:
+        - name: genie-agent-ping
+          image: genie-agent-app:4.1.0-SNAPSHOT
+          volumeMounts:
+            - mountPath: "/tmp/genie/jobs"
+              name: jobs-pv-storage
+          workingDir: /workspace
+          command:
+            - /cnb/lifecycle/launcher
+          args:
+            - "java"
+            - "org.springframework.boot.loader.JarLauncher"
+            - "ping"
+            - "--serverHost"
+            - "genie-grpc"
+            - "--serverPort"
+            - "9090"
+      restartPolicy: Never
+  backoffLimit: 1
+

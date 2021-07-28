@@ -117,3 +117,7 @@ env
 
 # publishing secrets
 secrets/signing-key
+# epam
+.java-version
+*.tgz
+.run
