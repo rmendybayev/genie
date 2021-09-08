@@ -58,6 +58,7 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew --info --stacktrace build codeCoverageReport coveralls
         env:
+          TRAVIS: true
           CI_NAME: github_actions
           CI_BUILD_NUMBER: ${{ github.sha }}
           CI_BUILD_URL: 'https://github.com/${{ github.repository }}'
