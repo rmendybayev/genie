@@ -493,10 +493,9 @@ task dockerPushGcr(group: "Docker", description: "Push the built docker app imag
     }
     dependsOn ":genie-app:dockerBuildAppImage"
     dependsOn ":genie-demo:dockerBuildClientImage"
-    dependsOn ":genie-agent-app:dockerBuildAgentAppImage"
     dependsOn ":genie-demo:dockerBuildApacheImage"
 
-    def imageList = ["genie-app", "genie-demo-client", genieAgentAppImageName, "genie-demo-apache"]
+    def imageList = ["genie-app", "genie-demo-client", "genie-demo-apache"]
     doLast {
         imageList.each {
             for (String tag : rootProject.ext.getDockerTags(it, project.version.toString())) {
