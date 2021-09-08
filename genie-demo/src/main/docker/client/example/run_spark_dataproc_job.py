@@ -49,7 +49,7 @@ job.command_arguments(
     "--region=" + str(sys.argv[3]) + " "
     "--class=com.epam.mvplatform.commons.CsvExtractorApp "
     "--properties=spark.driver.extraJavaOptions=-Dconfig.file=app.conf,spark.executor.extraJavaOptions=-Dconfig.file=app.conf "
-    "--jars=gs://dev-mvplatform-artifacts/demo/job/app.conf,gs://dev-mvplatform-artifacts/demo/job/extractor.jar "
+    "--jars=gs://mvplatform-ci-artefacts/spark-app/ingestion-data-extractor/app.conf,gs://mvplatform-ci-artefacts/spark-app/ingestion-data-extractor/commons-0.1.0-SNAPSHOT.jar "
 )
 
 # Submit the job to Genie

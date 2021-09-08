@@ -1,0 +1,68 @@
+name: "Build Branch"
+on:
+  push:
+    branches:
+      - 'epam-mvplatform/*'
+    tags-ignore:
+      - '*'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    strategy:
+      matrix:
+        # test against JDK 8
+        java: [ 8 ]
+    name: CI with Java ${{ matrix.java }}
+    env:
+      DB_USER: root
+      DB_PASSWORD: 'root'
+      DB_HOST: localhost
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: ${{ job.services.postgres.ports[5432] }}
+
+    steps:
+      - run: |
+          sudo /etc/init.d/mysql start
+          mysql -e 'CREATE DATABASE genie;' -uroot -proot
+          mysql -e 'SHOW DATABASES;' -uroot -proot
+          psql  -U postgres -c 'create database genie;'
+          psql  -U postgres -c 'SHOW DATABASES;'
+      - uses: actions/checkout@v1
+      - name: Setup jdk
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.java }}
+      - uses: actions/cache@v1
+        id: gradle-cache
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/gradle/dependency-locks/*.lockfile') }}
+          restore-keys: |
+            - ${{ runner.os }}-gradle-
+      - uses: actions/cache@v1
+        id: gradle-wrapper-cache
+        with:
+          path: ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradlewrapper-${{ hashFiles('gradle/wrapper/*') }}
+          restore-keys: |
+            - ${{ runner.os }}-gradlewrapper-
+      - name: Build with Gradle
+        run: ./gradlew --info --stacktrace build codeCoverageReport coveralls
+        env:
+          CI_NAME: github_actions
+          CI_BUILD_NUMBER: ${{ github.sha }}
+          CI_BUILD_URL: 'https://github.com/${{ github.repository }}'
+          CI_BRANCH: ${{ github.ref }}
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_TOKEN}}
+
