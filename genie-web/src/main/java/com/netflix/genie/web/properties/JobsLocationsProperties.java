@@ -42,12 +42,12 @@ public class JobsLocationsProperties {
      */
     public static final String PROPERTY_PREFIX = "genie.jobs.locations";
 
-    private static final String SYSTEM_TMP_DIR = System.getProperty("java.io.tmpdir", "/tmp");
+    private static final String SYSTEM_TMP_DIR = System.getProperty("java.io.tmpdir", "/tmp/");
 
     @NotNull(message = "Archives storage location is required")
     private URI archives = URI.create("file://" + SYSTEM_TMP_DIR + "genie/archives/");
 
     @Deprecated
     @NotNull(message = "Default job working directory is required")
-    private URI jobs = URI.create("file://" + SYSTEM_TMP_DIR + "/genie/jobs/");
+    private URI jobs = URI.create("file://" + SYSTEM_TMP_DIR + "genie/jobs/");
 }
