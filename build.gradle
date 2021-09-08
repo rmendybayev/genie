@@ -464,7 +464,7 @@ ext.getDockerTags = { String appName, String projectVersion ->
 
 task dockerLogout(type: Exec, group: "Docker", description: "Logout of docker hub") {
     onlyIf {
-        rootProject.ext.isDockerRunning()
+        rootProject.ext.isDockerRunning() && !System.getenv("GCR")
     }
     commandLine "docker", "logout"
 }
