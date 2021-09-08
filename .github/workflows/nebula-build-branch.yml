@@ -36,8 +36,6 @@ jobs:
           sudo /etc/init.d/mysql start
           mysql -e 'CREATE DATABASE genie;' -uroot -proot
           mysql -e 'SHOW DATABASES;' -uroot -proot
-          psql  -U postgres -c 'create database genie;'
-          psql  -U postgres -c 'SHOW DATABASES;'
       - uses: actions/checkout@v1
       - name: Setup jdk
         uses: actions/setup-java@v1
