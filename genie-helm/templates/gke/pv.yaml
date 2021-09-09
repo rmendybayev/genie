@@ -1,0 +1,16 @@
+{{- if .Values.gke.enabled -}}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ printf "%s-gke-pv" (include "common.names.fullname" .) }}
+  labels: {{ include "common.labels.standard" . | nindent 4 }}
+spec:
+  storageClassName: "jobs-output"
+  capacity:
+    storage: {{.Values.gke.disk.capacity }}
+  accessModes:
+    - ReadWriteMany
+  gcePersistentDisk:
+    pdName: {{ .Values.gke.disk.name }}
+    fsType: ext4
+{{- end}}

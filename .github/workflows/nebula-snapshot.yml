@@ -1,0 +1,64 @@
+name: "Publish snapshot to GCR"
+
+on:
+  push:
+    branches:
+      - epam-mvplatform
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 8
+      - name: Login to GCR
+        uses: docker/login-action@v1
+        with:
+          registry: us.gcr.io
+          username: _json_key
+          password: ${{ secrets.GCR_JSON_KEY }}
+      - uses: actions/cache@v2
+        id: gradle-cache
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+          restore-keys: |
+            - ${{ runner.os }}-gradle-
+      - uses: actions/cache@v2
+        id: gradle-wrapper-cache
+        with:
+          path: ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradlewrapper-${{ hashFiles('gradle/wrapper/*') }}
+          restore-keys: |
+            - ${{ runner.os }}-gradlewrapper-
+      - uses: actions/cache@v2
+        id: genie-ui-node-modules
+        with:
+          path: genie-ui/node_modules/
+          key: ${{ runner.os }}-genie-ui-node-modules-${{ hashFiles('genie-ui/node_modules/*') }}
+          restore-keys: |
+            - ${{ runner.os }}-genie-ui-node-modules-
+      - uses: actions/cache@v2
+        id: genie-ui-gradle-nodejs
+        with:
+          path: genie-ui/.gradle/nodejs
+          key: ${{ runner.os }}-genie-ui-gradle-nodejs-${{ hashFiles('genie-ui/.gradle/nodejs/*') }}
+          restore-keys: |
+            - ${{ runner.os }}-genie-ui-gradle-nodejs-
+      - uses: actions/cache@v2
+        id: genie-ui-gradle-npm
+        with:
+          path: genie-ui/.gradle/npm
+          key: ${{ runner.os }}-genie-ui-gradle-npm-${{ hashFiles('genie-ui/.gradle/npm/*') }}
+          restore-keys: |
+            - ${{ runner.os }}-genie-ui-gradle-npm-
+      - name: Build
+        run: ./gradlew build snapshot dockerPushGcr -Pdocker.registry=${{ secrets.MVPLATFORM_GCR_REGISTRY }}
+        env:
+          GCR: true
+          TRAVIS: true

@@ -38,6 +38,29 @@ springBoot {
     mainClassName = "com.netflix.genie.GenieAgentApplication"
 }
 
+def dockerDir = "${project.projectDir}/src/main/docker"
+def genieAgentAppImageName = "genie-agent-app"
+
+task dockerBuildAgentAppImage(type: Exec, group: "Docker", description: "") {
+    onlyIf {
+        rootProject.ext.isDockerRunning()
+    }
+    inputs.dir(dockerDir)
+    workingDir dockerDir
+
+    def commandArgs = new ArrayList<>()
+    commandArgs.add("docker")
+    commandArgs.add("build")
+    commandArgs.add("--force-rm")
+    for (String tag : rootProject.ext.getDockerTags(genieAgentAppImageName, project.version.toString())) {
+        commandArgs.add("-t")
+        commandArgs.add(tag)
+    }
+    commandArgs.add(".")
+
+    commandLine commandArgs
+}
+
 //mainClassName = "com.netflix.genie.GenieAgentApplication"
 //applicationDefaultJvmArgs = ["-noverify", "-XX:TieredStopAtLevel=1"]
 

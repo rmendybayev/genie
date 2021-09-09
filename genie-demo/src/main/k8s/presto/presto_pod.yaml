@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: presto
+  labels:
+    app: presto
+spec:
+  containers:
+    - name: presto-demo-pod
+      image: "starburstdata/presto:338-e.8"
+
+
+

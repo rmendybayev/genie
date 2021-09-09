@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: genie-apache
+  labels:
+    app: genie-apache
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: genie-apache
+      labels:
+        app: genie-apache
+    spec:
+      containers:
+        - name: genie-apache
+          image: {{ .Values.apache.image.repository}}:{{ .Values.apache.image.tag }}
+          imagePullPolicy: {{.Values.apache.image.pullPolicy}}
+      restartPolicy: Always
+  selector:
+    matchLabels:
+      app: genie-apache

@@ -1,0 +1,15 @@
+{{- if .Values.gke.enabled -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ printf "%s-gke-pvc" (include "common.names.fullname" .) }}
+  labels: {{ include "common.labels.standard" . | nindent 4 }}
+spec:
+  storageClassName: "jobs-output"
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: {{.Values.gke.disk.capacity }}
+  volumeName: {{ printf "%s-gke-pv" (include "common.names.fullname" .) }}
+{{- end }}

@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  {{- if .Values.gke.enabled }}
+  name: {{ .Values.gke.sa.k8s }}
+  {{- else }}
+  name: {{ printf "%s-app-sa" (include "common.names.fullname" .) }}
+  {{- end}}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: app
+  annotations:
+    {{- if .Values.gke.enabled}}
+    iam.gke.io/gcp-service-account: {{ .Values.gke.sa.iam }}
+    {{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ printf "%s-app-role" (include "common.names.fullname" .) }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: app
+rules:
+  - verbs:
+      - create
+    resources:
+      - jobs
+    apiGroups: ["batch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ printf "%s-app-sa-rb" (include "common.names.fullname" .) }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    app.kubernetes.io/component: app
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ printf "%s-app-role" (include "common.names.fullname" .) }}
+subjects:
+  - kind: ServiceAccount
+    {{- if .Values.gke.enabled }}
+    name: {{ .Values.gke.sa.k8s }}
+    {{- else }}
+    name: {{ printf "%s-app-sa" (include "common.names.fullname" .) }}
+    {{- end}}

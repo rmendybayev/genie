@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ printf "%s-jobs-output-pv" (include "common.names.fullname" .)}}
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: manual
+  capacity:
+    storage: 20Gi
+  hostPath:
+    path: "/tmp/genie"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ printf "%s-jobs-output-pvc" (include "common.names.fullname" .)}}
+spec:
+  accessModes:
+    - ReadWriteMany
+  volumeName: {{ printf "%s-jobs-output-pv" (include "common.names.fullname" .)}}
+  storageClassName: manual
+  resources:
+    requests:
+      storage: 4Gi

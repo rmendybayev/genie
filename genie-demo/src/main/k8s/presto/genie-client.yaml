@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  generateName: genie-client-
+  labels:
+    purpose: debug
+spec:
+  volumes:
+    - name: jobs-pv-storage
+      persistentVolumeClaim:
+        claimName: demo-genie-helm-jobs-output-pvc
+  containers:
+    - name: genie-agent-ping
+      image: netflixoss/genie-demo-client:4.1.0-SNAPSHOT
+      volumeMounts:
+        - mountPath: "/tmp/genie"
+          name: jobs-pv-storage
+      command: [ "/bin/bash", "-c", "--" ]
+      args: [ "while true; do sleep 30; done;" ]

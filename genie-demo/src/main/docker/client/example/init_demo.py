@@ -87,7 +87,7 @@ create_spark_version(genie, "201", hadoop_application_id)
 create_spark_version(genie, "213", hadoop_application_id)
 # create_spark_version(genie, "223", hadoop_application_id)
 # create_spark_version(genie, "234", hadoop_application_id)
-# create_spark_version(genie, "246", hadoop_application_id)
+create_spark_version(genie, "246", hadoop_application_id)
 # create_spark_version(genie, "300", hadoop_application_id)
 
 prod_cluster_id: str = genie.create_cluster(load_yaml("clusters/prod.yml"))
