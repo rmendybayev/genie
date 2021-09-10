@@ -30,10 +30,13 @@ import com.netflix.genie.web.properties.KubernetesAgentLauncherProperties;
 import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.apis.BatchV1Api;
-import io.kubernetes.client.openapi.models.*;
+import io.kubernetes.client.openapi.models.V1EnvVar;
+import io.kubernetes.client.openapi.models.V1Job;
+import io.kubernetes.client.openapi.models.V1JobBuilder;
+import io.kubernetes.client.openapi.models.V1PersistentVolumeClaimVolumeSource;
+import io.kubernetes.client.openapi.models.V1VolumeMount;
 import io.kubernetes.client.util.Config;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.core.env.Environment;
 
@@ -125,6 +128,13 @@ public class KubernetesAgentLauncherImpl implements AgentLauncher {
                                         this.kubernetesAgentLauncherProperties.getAgentAppImage()
                                     )
                                 )
+                                .withImagePullPolicy(
+                                    this.environment.getProperty(
+                                        KubernetesAgentLauncherProperties.AGENT_APP_IMAGE_PULL_POLICY,
+                                        String.class,
+                                        this.kubernetesAgentLauncherProperties.getAgentAppImagePullPolicy()
+                                    )
+                                )
                                 .withVolumeMounts(new V1VolumeMount()
                                     .mountPath("/tmp/genie")
                                     .name("jobs-pv-storage"))
@@ -134,9 +144,11 @@ public class KubernetesAgentLauncherImpl implements AgentLauncher {
                                         this.environment.getProperty(
                                             KubernetesAgentLauncherProperties.GCP_PROJECT_ID,
                                             String.class,
-                                            StringUtils.EMPTY
+                                            "or2-msq-epmc-bdcc-t1iylu"
                                         )
-                                    )))
+                                    )
+                                    )
+                                )
                                 .addNewCommand("/cnb/lifecycle/launcher")
                                 .addNewArg("java")
                                 .addNewArg("org.springframework.boot.loader.JarLauncher")

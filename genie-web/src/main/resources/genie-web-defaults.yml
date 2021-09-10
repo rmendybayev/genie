@@ -138,6 +138,9 @@ spring:
   cloud:
     zookeeper:
       enabled: false
+    gcp:
+      storage:
+        enabled: false
   data:
     redis:
       repositories:
