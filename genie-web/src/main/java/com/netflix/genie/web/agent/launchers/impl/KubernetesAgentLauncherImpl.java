@@ -20,6 +20,7 @@ package com.netflix.genie.web.agent.launchers.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.google.common.collect.Lists;
 import com.netflix.genie.web.agent.launchers.AgentLauncher;
 import com.netflix.genie.web.dtos.ResolvedJob;
 import com.netflix.genie.web.exceptions.checked.AgentLaunchException;
@@ -29,12 +30,10 @@ import com.netflix.genie.web.properties.KubernetesAgentLauncherProperties;
 import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.apis.BatchV1Api;
-import io.kubernetes.client.openapi.models.V1Job;
-import io.kubernetes.client.openapi.models.V1JobBuilder;
-import io.kubernetes.client.openapi.models.V1PersistentVolumeClaimVolumeSource;
-import io.kubernetes.client.openapi.models.V1VolumeMount;
+import io.kubernetes.client.openapi.models.*;
 import io.kubernetes.client.util.Config;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.core.env.Environment;
 
@@ -129,6 +128,15 @@ public class KubernetesAgentLauncherImpl implements AgentLauncher {
                                 .withVolumeMounts(new V1VolumeMount()
                                     .mountPath("/tmp/genie")
                                     .name("jobs-pv-storage"))
+                                .withEnv(Lists.newArrayList(
+                                    new V1EnvVar().name("spring.cloud.gcp.storage.enabled").value("true"),
+                                    new V1EnvVar().name("spring.cloud.gcp.project-id").value(
+                                        this.environment.getProperty(
+                                            KubernetesAgentLauncherProperties.GCP_PROJECT_ID,
+                                            String.class,
+                                            StringUtils.EMPTY
+                                        )
+                                    )))
                                 .addNewCommand("/cnb/lifecycle/launcher")
                                 .addNewArg("java")
                                 .addNewArg("org.springframework.boot.loader.JarLauncher")

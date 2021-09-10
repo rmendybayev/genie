@@ -61,6 +61,11 @@ public class KubernetesAgentLauncherProperties {
     public static final String AGENT_APP_SA = PROPERTY_PREFIX + ".sa";
 
     /**
+     * Name of the property that sets GCP project to Genie Agent Launcher
+     */
+    public static final String GCP_PROJECT_ID = PROPERTY_PREFIX + "projectId";
+
+    /**
      * Defaults to placeholder.
      */
     private String jobsOutputPvc = "<DEFAULT>";

@@ -27,6 +27,8 @@ dependencies {
     api("org.springframework:spring-core")
     api("org.springframework.cloud:spring-cloud-aws-autoconfigure")
 
+    api("org.springframework.cloud:spring-cloud-gcp-autoconfigure")
+
     /*******************************
      * Implementation Dependencies
      *******************************/
@@ -37,6 +39,9 @@ dependencies {
     implementation("org.apache.tika:tika-core")
     implementation("org.springframework.cloud:spring-cloud-starter-aws")
     implementation("org.springframework.cloud:spring-cloud-starter-sleuth")
+
+    implementation("org.springframework.cloud:spring-cloud-gcp-storage")
+    implementation("org.springframework.cloud:spring-cloud-gcp-starter")
 
     /*******************************
      * Compile Only Dependencies
