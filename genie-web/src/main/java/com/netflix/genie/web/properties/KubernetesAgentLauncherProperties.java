@@ -89,4 +89,9 @@ public class KubernetesAgentLauncherProperties {
      * Defaults to Empty string.
      */
     private String agentAppSa = StringUtils.EMPTY;
+
+    /**
+     * Defaults to placeholder.
+     */
+    private String gcpProjectId = "<DEFAULT>";
 }

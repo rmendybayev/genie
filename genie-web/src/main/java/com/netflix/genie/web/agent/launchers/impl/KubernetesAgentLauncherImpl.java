@@ -144,7 +144,7 @@ public class KubernetesAgentLauncherImpl implements AgentLauncher {
                                         this.environment.getProperty(
                                             KubernetesAgentLauncherProperties.GCP_PROJECT_ID,
                                             String.class,
-                                            "or2-msq-epmc-bdcc-t1iylu"
+                                            this.kubernetesAgentLauncherProperties.getGcpProjectId()
                                         )
                                     )
                                     )
