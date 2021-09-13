@@ -25,26 +25,22 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.cloud.gcp.autoconfigure.core.GcpContextAutoConfiguration;
 import org.springframework.cloud.gcp.autoconfigure.storage.GcpStorageAutoConfiguration;
-import org.springframework.cloud.gcp.core.Credentials;
-import org.springframework.cloud.gcp.core.DefaultCredentialsProvider;
-import org.springframework.cloud.gcp.core.DefaultGcpProjectIdProvider;
 import org.springframework.cloud.gcp.core.GcpProjectIdProvider;
 import org.springframework.cloud.gcp.storage.GoogleStorageProtocolResolver;
 import org.springframework.context.annotation.Bean;
 
-import java.io.IOException;
+import static org.mockito.Mockito.mock;
 
 public class GcpStorageAutoConfigurationTest {
     private final ApplicationContextRunner applicationContextRunner = new ApplicationContextRunner()
         .withConfiguration(
             AutoConfigurations.of(
+                GcpContextAutoConfiguration.class,
                 GcpStorageAutoConfiguration.class
             )
-        ).withSystemProperties("GOOGLE_CLOUD_PROJECT", "my-gcp-project-id")
-         .withPropertyValues(
-            "spring.cloud.gcp.storage.enabled=true"
-        ).withUserConfiguration(ExternalBeans.class);
+        ).withPropertyValues("spring.cloud.gcp.projectId=my-gcp-project-id").withUserConfiguration(TestConfiguration.class);
 
     @Test
     void expectedBeansExist() {
@@ -52,6 +48,8 @@ public class GcpStorageAutoConfigurationTest {
             context -> {
                 Assertions.assertThat(context).hasSingleBean(CredentialsProvider.class);
                 Assertions.assertThat(context).hasSingleBean(GcpProjectIdProvider.class);
+                GcpProjectIdProvider gcpProjectIdProvider = context.getBean(GcpProjectIdProvider.class);
+                Assertions.assertThat(gcpProjectIdProvider.getProjectId()).isEqualTo("my-gcp-project-id");
                 Assertions.assertThat(context).hasSingleBean(Storage.class);
 
                 Assertions.assertThat(context).hasSingleBean(GoogleStorageProtocolResolver.class);
@@ -59,19 +57,10 @@ public class GcpStorageAutoConfigurationTest {
         );
     }
 
-    private static class ExternalBeans {
+    private static class TestConfiguration {
         @Bean
-        GcpProjectIdProvider gcpProjectIdProvider() {
-            return new DefaultGcpProjectIdProvider();
-        }
-
-        @Bean
-        CredentialsProvider credentialsProvider() {
-            try {
-                return new DefaultCredentialsProvider(Credentials::new);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+        CredentialsProvider googleCredentials() {
+            return () -> mock(com.google.auth.Credentials.class);
         }
     }
 }
