@@ -41,10 +41,9 @@ public class GcpStorageAutoConfigurationTest {
             AutoConfigurations.of(
                 GcpStorageAutoConfiguration.class
             )
-        ).withPropertyValues(
-            "spring.cloud.gcp.storage.enabled=true",
-            "spring.cloud.gcp.credentials.location=file:/usr/local/key.json",
-            "spring.cloud.gcp.project-id=my-gcp-project-id"
+        ).withSystemProperties("GOOGLE_CLOUD_PROJECT", "my-gcp-project-id")
+         .withPropertyValues(
+            "spring.cloud.gcp.storage.enabled=true"
         ).withUserConfiguration(ExternalBeans.class);
 
     @Test
