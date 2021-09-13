@@ -3,7 +3,7 @@ name: "Publish snapshot to GCR"
 on:
   push:
     branches:
-      - epam-mvplatform
+      - master
 
 jobs:
   build:
