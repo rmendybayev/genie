@@ -8,6 +8,6 @@ tags:
   - type:dataproc
   - ver:1.5-debian10
 configs:
-  - http://genie-apache/clusters/gcp/dataproc/1.5-debian10/conf/core-site.xml
-  - http://genie-apache/clusters/gcp/dataproc/1.5-debian10/conf/mapred-site.xml
-  - http://genie-apache/clusters/gcp/dataproc/1.5-debian10/conf/yarn-site.xml
+  - gs://rzm-bdcc/rzm-cluster-2/core-site.xml
+  - gs://rzm-bdcc/rzm-cluster-2/mapred-site.xml
+  - gs://rzm-bdcc/rzm-cluster-2/yarn-site.xml

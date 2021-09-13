@@ -155,6 +155,7 @@ class JobSetupServiceImpl implements JobSetupService {
         try {
             this.downloadService.download(jobDownloadsManifest);
         } catch (final DownloadException e) {
+            log.error(" Download Service failed to download Job Resources with message {}", e.getMessage());
             throw new SetUpJobException("Failed to download job dependencies", e);
         }
 

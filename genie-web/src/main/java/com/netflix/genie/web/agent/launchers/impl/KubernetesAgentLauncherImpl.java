@@ -20,6 +20,7 @@ package com.netflix.genie.web.agent.launchers.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.google.common.collect.Lists;
 import com.netflix.genie.web.agent.launchers.AgentLauncher;
 import com.netflix.genie.web.dtos.ResolvedJob;
 import com.netflix.genie.web.exceptions.checked.AgentLaunchException;
@@ -29,6 +30,7 @@ import com.netflix.genie.web.properties.KubernetesAgentLauncherProperties;
 import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.apis.BatchV1Api;
+import io.kubernetes.client.openapi.models.V1EnvVar;
 import io.kubernetes.client.openapi.models.V1Job;
 import io.kubernetes.client.openapi.models.V1JobBuilder;
 import io.kubernetes.client.openapi.models.V1PersistentVolumeClaimVolumeSource;
@@ -126,9 +128,27 @@ public class KubernetesAgentLauncherImpl implements AgentLauncher {
                                         this.kubernetesAgentLauncherProperties.getAgentAppImage()
                                     )
                                 )
+                                .withImagePullPolicy(
+                                    this.environment.getProperty(
+                                        KubernetesAgentLauncherProperties.AGENT_APP_IMAGE_PULL_POLICY,
+                                        String.class,
+                                        this.kubernetesAgentLauncherProperties.getAgentAppImagePullPolicy()
+                                    )
+                                )
                                 .withVolumeMounts(new V1VolumeMount()
                                     .mountPath("/tmp/genie")
                                     .name("jobs-pv-storage"))
+                                .withEnv(Lists.newArrayList(
+                                    new V1EnvVar().name("spring.cloud.gcp.storage.enabled").value("true"),
+                                    new V1EnvVar().name("spring.cloud.gcp.project-id").value(
+                                        this.environment.getProperty(
+                                            KubernetesAgentLauncherProperties.GCP_PROJECT_ID,
+                                            String.class,
+                                            this.kubernetesAgentLauncherProperties.getGcpProjectId()
+                                        )
+                                    )
+                                    )
+                                )
                                 .addNewCommand("/cnb/lifecycle/launcher")
                                 .addNewArg("java")
                                 .addNewArg("org.springframework.boot.loader.JarLauncher")

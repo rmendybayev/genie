@@ -84,6 +84,10 @@ spring:
   main:
     web-application-type: none
     banner-mode: log
+  cloud:
+    gcp:
+      storage:
+        enabled: false
 
 logging:
   level:

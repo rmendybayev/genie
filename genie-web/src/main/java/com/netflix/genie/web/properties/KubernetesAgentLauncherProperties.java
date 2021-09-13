@@ -56,9 +56,19 @@ public class KubernetesAgentLauncherProperties {
     public static final String AGENT_APP_IMAGE = PROPERTY_PREFIX + ".image";
 
     /**
+     * Name of the property that sets pull policty of container image for Agent Application.
+     */
+    public static final String AGENT_APP_IMAGE_PULL_POLICY = PROPERTY_PREFIX + ".imagePullPolicy";
+
+    /**
      * Name of the property that sets name of k8s Service Account to attach to the Pod.
      */
     public static final String AGENT_APP_SA = PROPERTY_PREFIX + ".sa";
+
+    /**
+     * Name of the property that sets GCP project to Genie Agent Launcher.
+     */
+    public static final String GCP_PROJECT_ID = PROPERTY_PREFIX + ".projectId";
 
     /**
      * Defaults to placeholder.
@@ -71,7 +81,17 @@ public class KubernetesAgentLauncherProperties {
     private String agentAppImage = "<DEFAULT>";
 
     /**
+     * Defaults to Always.
+     */
+    private String agentAppImagePullPolicy = "Always";
+
+    /**
      * Defaults to Empty string.
      */
     private String agentAppSa = StringUtils.EMPTY;
+
+    /**
+     * Defaults to placeholder.
+     */
+    private String gcpProjectId = "<DEFAULT>";
 }

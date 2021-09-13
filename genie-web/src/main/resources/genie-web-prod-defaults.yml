@@ -31,3 +31,7 @@ spring:
         prepStmtCacheSqlLimit: 2048
         serverTimezone: UTC
         useServerPrepStmts: true
+  cloud:
+    gcp:
+      storage:
+        enabled: false
