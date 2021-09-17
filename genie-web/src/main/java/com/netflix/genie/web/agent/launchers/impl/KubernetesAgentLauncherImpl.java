@@ -102,7 +102,7 @@ public class KubernetesAgentLauncherImpl implements AgentLauncher {
             final ApiClient client = Config.defaultClient();
             final BatchV1Api batchV1Api = new BatchV1Api(client);
 
-            V1Affinity gkeAffinity = new V1Affinity()
+            final V1Affinity gkeAffinity = new V1Affinity()
                 .nodeAffinity(
                     new V1NodeAffinity()
                         .requiredDuringSchedulingIgnoredDuringExecution(
