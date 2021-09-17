@@ -30,9 +30,14 @@ import com.netflix.genie.web.properties.KubernetesAgentLauncherProperties;
 import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.apis.BatchV1Api;
+import io.kubernetes.client.openapi.models.V1Affinity;
 import io.kubernetes.client.openapi.models.V1EnvVar;
 import io.kubernetes.client.openapi.models.V1Job;
 import io.kubernetes.client.openapi.models.V1JobBuilder;
+import io.kubernetes.client.openapi.models.V1NodeAffinity;
+import io.kubernetes.client.openapi.models.V1NodeSelector;
+import io.kubernetes.client.openapi.models.V1NodeSelectorRequirement;
+import io.kubernetes.client.openapi.models.V1NodeSelectorTerm;
 import io.kubernetes.client.openapi.models.V1PersistentVolumeClaimVolumeSource;
 import io.kubernetes.client.openapi.models.V1VolumeMount;
 import io.kubernetes.client.util.Config;
@@ -97,6 +102,19 @@ public class KubernetesAgentLauncherImpl implements AgentLauncher {
             final ApiClient client = Config.defaultClient();
             final BatchV1Api batchV1Api = new BatchV1Api(client);
 
+            V1Affinity gkeAffinity = new V1Affinity()
+                .nodeAffinity(
+                    new V1NodeAffinity()
+                        .requiredDuringSchedulingIgnoredDuringExecution(
+                            new V1NodeSelector()
+                                .nodeSelectorTerms(Lists.newArrayList(
+                                    new V1NodeSelectorTerm()
+                                        .addMatchExpressionsItem(
+                                            new V1NodeSelectorRequirement()
+                                                .key("failure-domain.beta.kubernetes.io/zone")
+                                                .operator("In")
+                                                .values(Lists.newArrayList("us-east1-b", "us-east1-c")))
+                                ))));
             final V1Job body = new V1JobBuilder()
                 .withNewMetadata()
                     .withGenerateName("genie-kubernetes-launcher-")
@@ -168,6 +186,7 @@ public class KubernetesAgentLauncherImpl implements AgentLauncher {
                                     this.kubernetesAgentLauncherProperties.getAgentAppSa()
                                 )
                             )
+                            .withAffinity(gkeAffinity)
                             .withRestartPolicy("Never")
                             .endSpec()
                         .endTemplate()
