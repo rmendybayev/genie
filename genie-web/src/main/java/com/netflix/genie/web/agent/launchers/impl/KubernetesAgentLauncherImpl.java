@@ -30,24 +30,25 @@ import com.netflix.genie.web.properties.KubernetesAgentLauncherProperties;
 import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.apis.BatchV1Api;
-import io.kubernetes.client.openapi.models.V1Affinity;
+import io.kubernetes.client.openapi.models.V1Container;
 import io.kubernetes.client.openapi.models.V1EnvVar;
 import io.kubernetes.client.openapi.models.V1Job;
-import io.kubernetes.client.openapi.models.V1JobBuilder;
-import io.kubernetes.client.openapi.models.V1NodeAffinity;
-import io.kubernetes.client.openapi.models.V1NodeSelector;
-import io.kubernetes.client.openapi.models.V1NodeSelectorRequirement;
-import io.kubernetes.client.openapi.models.V1NodeSelectorTerm;
+import io.kubernetes.client.openapi.models.V1ObjectMetaBuilder;
 import io.kubernetes.client.openapi.models.V1PersistentVolumeClaimVolumeSource;
-import io.kubernetes.client.openapi.models.V1VolumeMount;
+import io.kubernetes.client.openapi.models.V1VolumeBuilder;
 import io.kubernetes.client.util.Config;
+import io.kubernetes.client.util.Yaml;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.ClassPathResource;
 
 import javax.annotation.Nullable;
 import javax.validation.Valid;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 /**
@@ -97,112 +98,87 @@ public class KubernetesAgentLauncherImpl implements AgentLauncher {
         @Valid final ResolvedJob resolvedJob,
         @Nullable final JsonNode requestedLauncherExt)
         throws AgentLaunchException {
+        final String templateFileName = this.environment.getProperty(
+            KubernetesAgentLauncherProperties.AGENT_APP_JOB_TEMPLATE,
+            String.class,
+            this.kubernetesAgentLauncherProperties.getAgentAppJobTemplate()
+        );
+
+
         try {
             final String jobId = resolvedJob.getJobSpecification().getJob().getId();
             final ApiClient client = Config.defaultClient();
             final BatchV1Api batchV1Api = new BatchV1Api(client);
 
-            final V1Affinity gkeAffinity = new V1Affinity()
-                .nodeAffinity(
-                    new V1NodeAffinity()
-                        .requiredDuringSchedulingIgnoredDuringExecution(
-                            new V1NodeSelector()
-                                .nodeSelectorTerms(Lists.newArrayList(
-                                    new V1NodeSelectorTerm()
-                                        .addMatchExpressionsItem(
-                                            new V1NodeSelectorRequirement()
-                                                .key("failure-domain.beta.kubernetes.io/zone")
-                                                .operator("In")
-                                                .values(Lists.newArrayList("us-east1-b", "us-east1-c")))
-                                ))));
-            final V1Job body = new V1JobBuilder()
-                .withNewMetadata()
-                    .withGenerateName("genie-kubernetes-launcher-")
-                    .withNamespace("default")
-                    .endMetadata()
-                .withNewSpec()
-                    .withNewTemplate()
-                        .withNewMetadata()
-                            .addToLabels("name", "genie-agent-launcher")
-                            .endMetadata()
-                        .editOrNewSpec()
-                            .addNewVolume()
-                                .withName("jobs-pv-storage")
-                                .withPersistentVolumeClaim(new V1PersistentVolumeClaimVolumeSource().claimName(
-                                    this.environment.getProperty(
-                                        KubernetesAgentLauncherProperties.JOBS_OUTPUT_PVC,
-                                        String.class,
-                                        this.kubernetesAgentLauncherProperties.getJobsOutputPvc()
-                                    )
-                                )
-                                )
-                                .endVolume()
-                            .addNewContainer()
-                                .withName("main")
-                                .withImage(
-                                    this.environment.getProperty(
-                                        KubernetesAgentLauncherProperties.AGENT_APP_IMAGE,
-                                        String.class,
-                                        this.kubernetesAgentLauncherProperties.getAgentAppImage()
-                                    )
-                                )
-                                .withImagePullPolicy(
-                                    this.environment.getProperty(
-                                        KubernetesAgentLauncherProperties.AGENT_APP_IMAGE_PULL_POLICY,
-                                        String.class,
-                                        this.kubernetesAgentLauncherProperties.getAgentAppImagePullPolicy()
-                                    )
-                                )
-                                .withVolumeMounts(new V1VolumeMount()
-                                    .mountPath("/tmp/genie")
-                                    .name("jobs-pv-storage"))
-                                .withEnv(Lists.newArrayList(
-                                    new V1EnvVar().name("spring.cloud.gcp.storage.enabled").value("true"),
-                                    new V1EnvVar().name("spring.cloud.gcp.project-id").value(
-                                        this.environment.getProperty(
-                                            KubernetesAgentLauncherProperties.GCP_PROJECT_ID,
-                                            String.class,
-                                            this.kubernetesAgentLauncherProperties.getGcpProjectId()
-                                        )
-                                    )
-                                    )
-                                )
-                                .addNewCommand("/cnb/lifecycle/launcher")
-                                .addNewArg("java")
-                                .addNewArg("org.springframework.boot.loader.JarLauncher")
-                                .addNewArg("exec")
-                                .addNewArg("--server-host")
-                                .addNewArg("genie-grpc")
-                                .addNewArg("--server-port")
-                                .addNewArg(Integer.toString(this.rpcPort))
-                                .addNewArg("--api-job")
-                                .addNewArg("--job-id")
-                                .addNewArg(jobId)
-                                .endContainer()
-                            .withServiceAccountName(
-                                this.environment.getProperty(
-                                    KubernetesAgentLauncherProperties.AGENT_APP_SA,
-                                    String.class,
-                                    this.kubernetesAgentLauncherProperties.getAgentAppSa()
-                                )
-                            )
-                            .withAffinity(gkeAffinity)
-                            .withRestartPolicy("Never")
-                            .endSpec()
-                        .endTemplate()
-                    .endSpec()
-                .build();
+            final InputStream jobTemplate = new ClassPathResource(templateFileName).getInputStream();
+            final InputStreamReader reader = new InputStreamReader(jobTemplate, StandardCharsets.UTF_8);
+            final V1Job job = (V1Job) Yaml.load(reader);
+            reader.close();
+
+            job.getSpec().getTemplate().setMetadata(new V1ObjectMetaBuilder().addToLabels("jobId", jobId).build());
+            job.getSpec().getTemplate().getSpec().addVolumesItem(new V1VolumeBuilder()
+                .withName("jobs-pv-storage")
+                .withPersistentVolumeClaim(new V1PersistentVolumeClaimVolumeSource().claimName(
+                        this.environment.getProperty(
+                            KubernetesAgentLauncherProperties.JOBS_OUTPUT_PVC,
+                            String.class,
+                            this.kubernetesAgentLauncherProperties.getJobsOutputPvc()
+                        )
+                    )
+                )
+                .build());
+            job.getSpec().getTemplate().getSpec().serviceAccountName(
+                this.environment.getProperty(
+                KubernetesAgentLauncherProperties.AGENT_APP_SA,
+                String.class,
+                this.kubernetesAgentLauncherProperties.getAgentAppSa()
+            ));
+            final V1Container agentLauncherContainer = job.getSpec().getTemplate().getSpec().getContainers().get(0);
+            agentLauncherContainer.setImage(
+                this.environment.getProperty(
+                KubernetesAgentLauncherProperties.AGENT_APP_IMAGE,
+                String.class,
+                this.kubernetesAgentLauncherProperties.getAgentAppImage()
+            ));
+            agentLauncherContainer.setImagePullPolicy(
+                this.environment.getProperty(
+                KubernetesAgentLauncherProperties.AGENT_APP_IMAGE_PULL_POLICY,
+                String.class,
+                this.kubernetesAgentLauncherProperties.getAgentAppImagePullPolicy()
+            ));
+            agentLauncherContainer.env(Lists.newArrayList(
+                new V1EnvVar().name("spring.cloud.gcp.core.enabled").value("true"),
+                new V1EnvVar().name("spring.cloud.gcp.project-id").value(
+                    this.environment.getProperty(
+                        KubernetesAgentLauncherProperties.GCP_PROJECT_ID,
+                        String.class,
+                        this.kubernetesAgentLauncherProperties.getGcpProjectId()
+                    )
+                )
+            ));
+            agentLauncherContainer
+                .addCommandItem("/cnb/lifecycle/launcher")
+                .addArgsItem("java")
+                .addArgsItem("org.springframework.boot.loader.JarLauncher")
+                .addArgsItem("exec")
+                .addArgsItem("--server-host")
+                .addArgsItem("genie-grpc")
+                .addArgsItem("--server-port")
+                .addArgsItem(Integer.toString(this.rpcPort))
+                .addArgsItem("--api-job")
+                .addArgsItem("--job-id")
+                .addArgsItem(jobId);
             log.info("Launching container for jobID: " + jobId);
 
             batchV1Api.createNamespacedJob(
                 "default",
-                body,
+                job,
                 null,
                 null, null
             );
         } catch (IOException e) {
             throw new AgentLaunchException(
-                "Unable to launch agent using command: ", e
+                String.format("Unable to launch agent using command: %s", e.getMessage()), e
             );
         } catch (ApiException e) {
             log.error("ApiException was thrown. Here is some details");

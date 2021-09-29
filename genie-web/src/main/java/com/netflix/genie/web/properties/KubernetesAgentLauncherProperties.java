@@ -71,6 +71,11 @@ public class KubernetesAgentLauncherProperties {
     public static final String GCP_PROJECT_ID = PROPERTY_PREFIX + ".projectId";
 
     /**
+     * Name of the property that sets path to job template yaml file.
+     */
+    public static final String AGENT_APP_JOB_TEMPLATE = PROPERTY_PREFIX + ".jobTemplate";
+
+    /**
      * Defaults to placeholder.
      */
     private String jobsOutputPvc = "<DEFAULT>";
@@ -94,4 +99,9 @@ public class KubernetesAgentLauncherProperties {
      * Defaults to placeholder.
      */
     private String gcpProjectId = "<DEFAULT>";
+
+    /**
+     * Defaults to src/main/resources.
+     */
+    private String agentAppJobTemplate = "genie-agent-launcher-template.yaml";
 }
