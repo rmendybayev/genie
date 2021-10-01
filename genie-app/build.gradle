@@ -38,6 +38,7 @@ dependencies {
 }
 
 bootJar {
+    requiresUnpack '**/client-java-*.jar'
     manifest {
         attributes("Implementation-Title": project.name)
         attributes("Implementation-Version": project.version)
