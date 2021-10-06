@@ -65,6 +65,7 @@ public class KubernetesAgentLauncherImplTest {
         this.rpcInfo = Mockito.mock(GenieWebRpcInfo.class);
         this.launcherProperties = new KubernetesAgentLauncherProperties();
         this.launcherProperties.setAgentAppJobTemplate("test-agent-launcher-job.yaml");
+        this.launcherProperties.setAppPodName("test-pod-0");
         this.environment = new MockEnvironment();
         Mockito
             .when(
