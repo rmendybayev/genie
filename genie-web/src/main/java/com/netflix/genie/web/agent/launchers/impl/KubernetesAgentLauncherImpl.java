@@ -124,11 +124,14 @@ public class KubernetesAgentLauncherImpl implements AgentLauncher {
             job.getSpec().getTemplate().getSpec().addVolumesItem(new V1VolumeBuilder()
                 .withName("jobs-pv-storage")
                 .withPersistentVolumeClaim(new V1PersistentVolumeClaimVolumeSource().claimName(
-                        this.environment.getProperty(
+                        String.format(
+                            "%s-%s",
+                            this.environment.getProperty(
                             KubernetesAgentLauncherProperties.JOBS_OUTPUT_PVC,
                             String.class,
                             this.kubernetesAgentLauncherProperties.getJobsOutputPvc()
-                        )
+                        ),
+                            podHostName)
                     )
                 )
                 .build());
