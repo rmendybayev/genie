@@ -76,6 +76,11 @@ public class KubernetesAgentLauncherProperties {
     public static final String AGENT_APP_JOB_TEMPLATE = PROPERTY_PREFIX + ".jobTemplate";
 
     /**
+     * Name of the property that sets hostname of Genie Web App.
+     */
+    public static final String APP_POD_NAME = PROPERTY_PREFIX + ".podName";
+
+    /**
      * Defaults to placeholder.
      */
     private String jobsOutputPvc = "<DEFAULT>";
@@ -104,4 +109,9 @@ public class KubernetesAgentLauncherProperties {
      * Defaults to src/main/resources.
      */
     private String agentAppJobTemplate = "genie-agent-launcher-template.yaml";
+
+    /**
+     * Defauitls to placeholder.
+     */
+    private String appPodName = "<DEFAULT>";
 }

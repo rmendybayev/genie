@@ -98,6 +98,11 @@ public class KubernetesAgentLauncherImpl implements AgentLauncher {
         @Valid final ResolvedJob resolvedJob,
         @Nullable final JsonNode requestedLauncherExt)
         throws AgentLaunchException {
+        final String podHostName = this.environment.getProperty(
+            KubernetesAgentLauncherProperties.APP_POD_NAME,
+            String.class,
+            this.kubernetesAgentLauncherProperties.getAppPodName()
+        );
         final String templateFileName = this.environment.getProperty(
             KubernetesAgentLauncherProperties.AGENT_APP_JOB_TEMPLATE,
             String.class,
@@ -119,11 +124,14 @@ public class KubernetesAgentLauncherImpl implements AgentLauncher {
             job.getSpec().getTemplate().getSpec().addVolumesItem(new V1VolumeBuilder()
                 .withName("jobs-pv-storage")
                 .withPersistentVolumeClaim(new V1PersistentVolumeClaimVolumeSource().claimName(
-                        this.environment.getProperty(
+                        String.format(
+                            "%s-%s",
+                            this.environment.getProperty(
                             KubernetesAgentLauncherProperties.JOBS_OUTPUT_PVC,
                             String.class,
                             this.kubernetesAgentLauncherProperties.getJobsOutputPvc()
-                        )
+                        ),
+                            podHostName)
                     )
                 )
                 .build());
