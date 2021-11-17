@@ -96,9 +96,9 @@ public class KubernetesAgentLauncherProperties {
     private String agentAppImagePullPolicy = "Always";
 
     /**
-     * Defaults to Empty string.
+     * Defaults to placeholder.
      */
-    private String agentAppSa = StringUtils.EMPTY;
+    private String agentAppSa = "<DEFAULT>";
 
     /**
      * Defaults to placeholder.

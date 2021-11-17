@@ -156,6 +156,7 @@ public class KubernetesAgentLauncherImpl implements AgentLauncher {
             ));
             agentLauncherContainer.env(Lists.newArrayList(
                 new V1EnvVar().name("spring.cloud.gcp.core.enabled").value("true"),
+                new V1EnvVar().name("spring.cloud.gcp.storage.enabled").value("true"),
                 new V1EnvVar().name("spring.cloud.gcp.project-id").value(
                     this.environment.getProperty(
                         KubernetesAgentLauncherProperties.GCP_PROJECT_ID,
