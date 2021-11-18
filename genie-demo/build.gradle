@@ -74,3 +74,18 @@ task dockerPush(group: "Docker", description: "Push the demo docker images to do
         }
     }
 }
+
+task dockerPushGcrClient(group: "Docker", description: "Push the built docker app image to Gcr") {
+    onlyIf {
+        rootProject.ext.isDockerRunning() && System.getenv("GCR")
+    }
+    dependsOn ":genie-demo:dockerBuildClientImage"
+
+    doLast {
+        for (String tag : rootProject.ext.getDockerTags("genie-demo-client", project.version.toString())) {
+            exec {
+                commandLine "docker", "push", tag
+            }
+        }
+    }
+}

@@ -20,7 +20,6 @@ package com.netflix.genie.web.properties;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
@@ -96,9 +95,9 @@ public class KubernetesAgentLauncherProperties {
     private String agentAppImagePullPolicy = "Always";
 
     /**
-     * Defaults to Empty string.
+     * Defaults to placeholder.
      */
-    private String agentAppSa = StringUtils.EMPTY;
+    private String agentAppSa = "<DEFAULT>";
 
     /**
      * Defaults to placeholder.
