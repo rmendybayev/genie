@@ -35,6 +35,18 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class KubernetesAgentLauncherProperties {
     /**
+     * Enabling GCP Spring Core configuration.
+     * This property is set on app start, however in order to pass it to launcher it has to be looked up.
+     */
+    public static final String GCP_CORE_ENABLED_SPRING_PROPERTY_KEY = "spring.cloud.gcp.core.enabled";
+
+    /**
+     * Enabling GCP Storage Configuration.
+     * This property is set on app start, however in order to pass it to launcher it has to be looked up.
+     */
+    public static final String GCP_STORAGE_ENABLED_SPRING_PROPERTY_KEY = "spring.cloud.gcp.storage.enabled";
+
+    /**
      * Prefix for all properties related to k8s agent launcher.
      */
     public static final String PROPERTY_PREFIX = "genie.agent.launcher.k8s";
@@ -48,6 +60,11 @@ public class KubernetesAgentLauncherProperties {
      *  Name of the property that sets name of Persistent Volume Claim for Jobs output volume.
      */
     public static final String JOBS_OUTPUT_PVC = PROPERTY_PREFIX + ".pvc";
+
+    /**
+     *  Name of the property that sets namespace to Pod with Agent Launcher.
+     */
+    public static final String AGENT_APP_JOB_NAMESPACE = PROPERTY_PREFIX + ".namespace";
 
     /**
      * Name of the property that sets name of container image for Agent Application.
@@ -78,6 +95,7 @@ public class KubernetesAgentLauncherProperties {
      * Name of the property that sets hostname of Genie Web App.
      */
     public static final String APP_POD_NAME = PROPERTY_PREFIX + ".podName";
+
 
     /**
      * Defaults to placeholder.
@@ -113,4 +131,9 @@ public class KubernetesAgentLauncherProperties {
      * Defauitls to placeholder.
      */
     private String appPodName = "<DEFAULT>";
+
+    /**
+     * Defaults to placeholder.
+     */
+    private String appNamespace = "<DEFAULT";
 }
