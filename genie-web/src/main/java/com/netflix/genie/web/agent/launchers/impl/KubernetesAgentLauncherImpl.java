@@ -155,14 +155,24 @@ public class KubernetesAgentLauncherImpl implements AgentLauncher {
                 this.kubernetesAgentLauncherProperties.getAgentAppImagePullPolicy()
             ));
             agentLauncherContainer.env(Lists.newArrayList(
-                new V1EnvVar().name("spring.cloud.gcp.core.enabled").value("true"),
-                new V1EnvVar().name("spring.cloud.gcp.storage.enabled").value("true"),
-                new V1EnvVar().name("spring.cloud.gcp.project-id").value(
-                    this.environment.getProperty(
-                        KubernetesAgentLauncherProperties.GCP_PROJECT_ID,
-                        String.class,
-                        this.kubernetesAgentLauncherProperties.getGcpProjectId()
-                    )
+                new V1EnvVar()
+                    .name(KubernetesAgentLauncherProperties.GCP_CORE_ENABLED_SPRING_PROPERTY_KEY)
+                    .value(
+                        this.environment.getProperty(
+                            KubernetesAgentLauncherProperties.GCP_CORE_ENABLED_SPRING_PROPERTY_KEY)),
+                new V1EnvVar()
+                    .name(KubernetesAgentLauncherProperties.GCP_STORAGE_ENABLED_SPRING_PROPERTY_KEY)
+                    .value(
+                        this.environment.getProperty(
+                            KubernetesAgentLauncherProperties.GCP_STORAGE_ENABLED_SPRING_PROPERTY_KEY)),
+                new V1EnvVar()
+                    .name("spring.cloud.gcp.project-id")
+                    .value(
+                        this.environment.getProperty(
+                            KubernetesAgentLauncherProperties.GCP_PROJECT_ID,
+                            String.class,
+                            this.kubernetesAgentLauncherProperties.getGcpProjectId()
+                        )
                 )
             ));
             agentLauncherContainer
@@ -179,8 +189,13 @@ public class KubernetesAgentLauncherImpl implements AgentLauncher {
                 .addArgsItem(jobId);
             log.info("Launching container for jobID: " + jobId);
 
+            final String namespace = this.environment.getProperty(
+                KubernetesAgentLauncherProperties.AGENT_APP_JOB_NAMESPACE,
+                String.class,
+                this.kubernetesAgentLauncherProperties.getAppNamespace()
+            );
             batchV1Api.createNamespacedJob(
-                "default",
+                namespace,
                 job,
                 null,
                 null, null
